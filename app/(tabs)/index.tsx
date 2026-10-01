@@ -1,98 +1,68 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Card, ScreenShell } from '@/components/screen-shell';
+import { SectionTitle } from '@/components/section-title';
+import { student } from '@/constants/mock-data';
+import { palette } from '@/constants/palette';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ScreenShell>
+      <View style={styles.topLine}>
+        <View>
+          <Text style={styles.eyebrow}>EDUCAR · FAMILY</Text>
+          <Text style={styles.greeting}>Good morning</Text>
+        </View>
+        <Pressable accessibilityLabel="Open account" onPress={() => router.push('/login')} style={styles.avatar}><Text style={styles.avatarText}>{student.initials}</Text></Pressable>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <Card style={styles.studentCard}>
+        <Text style={styles.label}>STUDENT</Text>
+        <Text style={styles.studentName}>{student.name}</Text>
+        <Text style={styles.muted}>{student.grade}</Text>
+        <View style={styles.divider} />
+        <Text style={styles.muted}>Viewing information for this student</Text>
+      </Card>
+
+      <View style={styles.balanceHeader}><SectionTitle title="Outstanding balance" action="March 2026" /></View>
+      <Card>
+        <Text style={styles.amount}>$ 42,000</Text>
+        <Text style={styles.muted}>1 item awaiting payment</Text>
+        <View style={styles.divider} />
+        <View style={styles.row}><Text style={styles.body}>March tuition</Text><Text style={styles.due}>Due Mar 10</Text></View>
+        <Pressable accessibilityRole="button" onPress={() => router.push('/(tabs)/payments')} style={styles.button}><Text style={styles.buttonText}>Review payments →</Text></Pressable>
+      </Card>
+
+      <SectionTitle title="Recent activity" action="See all" />
+      <Card style={styles.activityCard}>
+        <View style={styles.activityDot} />
+        <View style={{ flex: 1 }}><Text style={styles.body}>School lunch payment received</Text><Text style={styles.muted}>Mar 02 · Receipt available</Text></View>
+        <Text style={styles.paid}>Paid</Text>
+      </Card>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  topLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
+  eyebrow: { fontSize: 10, letterSpacing: 1.5, fontWeight: '700', color: palette.muted },
+  greeting: { fontSize: 28, fontWeight: '700', letterSpacing: -0.8, color: palette.ink, marginTop: 5 },
+  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: palette.ink, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: palette.paper, fontSize: 13, fontWeight: '700' },
+  studentCard: { backgroundColor: palette.soft, borderColor: palette.soft },
+  label: { fontSize: 10, color: palette.muted, fontWeight: '700', letterSpacing: 1.1 },
+  studentName: { fontSize: 19, color: palette.ink, fontWeight: '700', marginTop: 8 },
+  muted: { color: palette.muted, fontSize: 13, marginTop: 4 },
+  divider: { height: 1, backgroundColor: palette.line, marginVertical: 16 },
+  balanceHeader: { marginBottom: -10 },
+  amount: { fontSize: 30, fontWeight: '700', letterSpacing: -0.8, color: palette.ink },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  body: { fontSize: 14, fontWeight: '600', color: palette.ink },
+  due: { fontSize: 12, color: palette.muted },
+  button: { backgroundColor: palette.ink, borderRadius: 12, padding: 14, marginTop: 18, alignItems: 'center' },
+  buttonText: { color: palette.paper, fontSize: 14, fontWeight: '600' },
+  activityCard: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  activityDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: palette.ink },
+  paid: { fontSize: 12, fontWeight: '600', color: palette.ink },
 });
