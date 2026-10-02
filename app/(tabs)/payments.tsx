@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, ScreenShell } from '@/components/screen-shell';
 import { SectionTitle } from '@/components/section-title';
@@ -21,7 +21,27 @@ export default function PaymentsScreen() {
           <View style={styles.itemBottom}><Text style={styles.subtle}>{item.due}</Text><Text style={styles.amount}>{item.amount}</Text></View>
         </Card>
       ))}
-      <Card style={styles.notice}><Text style={styles.itemTitle}>Bank transfer</Text><Text style={styles.subtle}>Payment and receipt upload will be available here.</Text></Card>
+      <SectionTitle title="Transfer receipts" action="2 files" />
+      <Card style={styles.itemCard}>
+        <View style={styles.itemTop}>
+          <Text style={styles.itemTitle}>March tuition · INV-2026-03</Text>
+          <Text style={styles.receiptCount}>2</Text>
+        </View>
+        <View style={styles.receiptRow}>
+          <Text style={styles.subtle}>transfer-0302.pdf</Text>
+          <Text style={styles.receiptStatus}>Received</Text>
+        </View>
+        <View style={styles.receiptRow}>
+          <Text style={styles.subtle}>transfer-0305.pdf</Text>
+          <Text style={styles.receiptStatus}>Received</Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => Alert.alert('Demo only', 'Receipt upload will be connected to the file picker.')}
+          style={styles.uploadButton}>
+          <Text style={styles.uploadText}>＋ Attach another receipt</Text>
+        </Pressable>
+      </Card>
     </ScreenShell>
   );
 }
@@ -43,5 +63,9 @@ const styles = StyleSheet.create({
   paid: { color: palette.ink, backgroundColor: palette.soft },
   itemBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   amount: { fontSize: 15, fontWeight: '700', color: palette.ink },
-  notice: { backgroundColor: palette.soft, borderColor: palette.soft },
+  receiptCount: { color: palette.muted, fontSize: 12, fontWeight: '600' },
+  receiptRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  receiptStatus: { color: palette.muted, fontSize: 11, fontWeight: '600' },
+  uploadButton: { borderWidth: 1, borderColor: palette.line, borderRadius: 12, padding: 13, alignItems: 'center', marginTop: 2 },
+  uploadText: { color: palette.ink, fontSize: 13, fontWeight: '600' },
 });
