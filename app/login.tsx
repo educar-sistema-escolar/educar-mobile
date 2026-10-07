@@ -1,10 +1,30 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { palette } from '@/constants/palette';
 
 export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSignIn = () => {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || !password) {
+      setError('Email and password are required.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError('Enter a valid email address.');
+      return;
+    }
+
+    setError('');
+    router.replace('/(tabs)');
+  };
+
   return (
     <SafeAreaView style={styles.page}>
       <View style={styles.content}>
@@ -14,12 +34,13 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>Sign in to see your family&apos;s school information.</Text>
         <View style={styles.fields}>
           <Text style={styles.label}>EMAIL</Text>
-          <TextInput accessibilityLabel="Email" placeholder="you@example.com" placeholderTextColor="#999999" keyboardType="email-address" autoCapitalize="none" style={styles.input} />
+          <TextInput accessibilityLabel="Email" placeholder="you@example.com" placeholderTextColor="#999999" keyboardType="email-address" autoCapitalize="none" autoComplete="email" value={email} onChangeText={setEmail} style={styles.input} />
           <Text style={styles.label}>PASSWORD</Text>
-          <TextInput accessibilityLabel="Password" placeholder="Enter your password" placeholderTextColor="#999999" secureTextEntry style={styles.input} />
+          <TextInput accessibilityLabel="Password" placeholder="Enter your password" placeholderTextColor="#999999" secureTextEntry autoComplete="current-password" value={password} onChangeText={setPassword} style={styles.input} />
           <Text style={styles.forgot}>Forgot password?</Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={() => router.replace('/(tabs)')} style={styles.button}><Text style={styles.buttonText}>Sign in</Text></Pressable>
+        {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
+        <Pressable accessibilityRole="button" onPress={handleSignIn} style={styles.button}><Text style={styles.buttonText}>Sign in</Text></Pressable>
         <Text style={styles.note}>Mock screen · Authentication is not connected</Text>
       </View>
     </SafeAreaView>
@@ -38,6 +59,7 @@ const styles = StyleSheet.create({
   label: { color: palette.muted, fontSize: 10, letterSpacing: 1, fontWeight: '700', marginTop: 8 },
   input: { height: 50, borderColor: palette.line, borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, fontSize: 14, color: palette.ink },
   forgot: { color: palette.ink, fontSize: 12, fontWeight: '600', textAlign: 'right', marginTop: 4 },
+  error: { color: palette.ink, fontSize: 12, marginTop: 4 },
   button: { backgroundColor: palette.ink, borderRadius: 12, padding: 16, marginTop: 16 },
   buttonText: { color: palette.paper, textAlign: 'center', fontSize: 14, fontWeight: '600' },
   note: { color: palette.muted, textAlign: 'center', fontSize: 11, marginTop: 12 },
