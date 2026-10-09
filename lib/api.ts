@@ -18,19 +18,12 @@ let generation = 0;
 const subscribers = new Set<() => void>();
 export const currentSession = () => session;
 export function subscribe(callback: () => void) { subscribers.add(callback); return () => { subscribers.delete(callback); }; }
+let persistence: Promise<void> = Promise.resolve();
 async function store(value: Session | null) {
-    session = value;
-    try {
-        if (Platform.OS !== 'web') {
-            if (value)
-                await SecureStore.setItemAsync('educar-session', JSON.stringify(value));
-            else
-                await SecureStore.deleteItemAsync('educar-session');
-        }
-    }
-    finally {
-        subscribers.forEach(fn => fn());
-    }
+ session=value;subscribers.forEach(fn=>fn());
+ if(Platform.OS==='web') return;
+ const write=()=>value ? SecureStore.setItemAsync('educar-session',JSON.stringify(value)) : SecureStore.deleteItemAsync('educar-session');
+ persistence=persistence.catch(()=>undefined).then(write);await persistence;
 }
 async function rawRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
     if (!configured)
@@ -50,8 +43,8 @@ async function rawRequest<T>(path: string, options: RequestInit = {}): Promise<T
         clearTimeout(timer);
     }
 }
-async function verifySession(value: Session, expected = generation) {
-    if (expected !== generation) throw new Error('Authentication changed. Please try again.');
+async function verifySession(value: Session, expected = generation, active: () => boolean = () => true) {
+    if (expected !== generation || !active()) throw new Error('Authentication changed. Please try again.');
     try {
         const profiles = await rawRequest<{
             full_name: string;
@@ -63,7 +56,7 @@ async function verifySession(value: Session, expected = generation) {
         if (!profile?.is_active || profile.account_status !== 'active' || !['guardian', 'parent'].includes(profile.role))
             throw new Error('An active family account is required. Administration is available on the web.');
         value.name = profile.full_name;
-        if (expected !== generation) throw new Error('Authentication changed. Please try again.');
+        if (expected !== generation || !active()) throw new Error('Authentication changed. Please try again.');
         await store(value);
     }
     catch (error) {
@@ -73,7 +66,7 @@ async function verifySession(value: Session, expected = generation) {
 }
 export async function login(email: string, password: string) {
     const expected = ++generation;
-    const value = await request<Session & {
+    const value = await rawRequest<Session & {
         expires_in: number;
     }>('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email: email.trim().toLowerCase(), password }) });
     value.expires_at = Date.now() + value.expires_in * 1000;
@@ -90,7 +83,7 @@ export const refreshSession = singleFlight(async () => {
         await verifySession({ ...refreshed, expires_at: Date.now() + refreshed.expires_in * 1000 }, expected);
     }
     catch (error) {
-        await store(null);
+        if (expected === generation) await store(null);
         throw error;
     }
 });
@@ -111,19 +104,16 @@ export async function restoreSession() {
             }>('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: JSON.stringify({ refresh_token: value.refresh_token }) });
             value = { ...refreshed, expires_at: Date.now() + refreshed.expires_in * 1000 };
         }
-        await verifySession(value);
+        await verifySession(value, expected);
     }
     catch {
         if (expected === generation) await store(null);
     }
 }
-export async function logout() { generation++; try {
-    if (session)
-        await request('/auth/v1/logout', { method: 'POST' });
+export async function logout() {
+ const token=session?.access_token;generation++;await store(null);
+ if(token) await rawRequest('/auth/v1/logout',{method:'POST',headers:{Authorization: 'Bearer '+token}});
 }
-finally {
-    await store(null);
-} }
 export const resetPassword = (email: string) => request(`/auth/v1/recover?redirect_to=${encodeURIComponent(process.env.EXPO_PUBLIC_PASSWORD_RESET_URL || 'educar://recovery')}`, { method: 'POST', body: JSON.stringify({ email: email.trim().toLowerCase() }) });
 export const changePassword = (password: string) => request('/auth/v1/user', { method: 'PUT', body: JSON.stringify({ password }) });
 export async function uploadReceipt(path: string, blob: Blob, type: string) {
@@ -151,5 +141,5 @@ export async function acceptRecovery(accessToken: string, refreshToken: string, 
         id: string;
     }>('/auth/v1/user', { headers: { Authorization: `Bearer ${accessToken}` } });
     if (!active()) return;
-    await verifySession({ access_token: accessToken, refresh_token: refreshToken, expires_at: Date.now() + 300000, user, name: '' }, expected);
+    await verifySession({ access_token: accessToken, refresh_token: refreshToken, expires_at: Date.now() + 300000, user, name: '' }, expected, active);
 }
