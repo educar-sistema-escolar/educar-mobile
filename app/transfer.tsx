@@ -34,8 +34,13 @@ function TransferForm() {
         if (!session || !invoice || submissionId && !submission)
             throw new Error('This invoice or transfer is unavailable.');
         const cents = submissionId ? 1 : parseMoney(amount);
+        if (!file) throw new Error('Attach a receipt.');
+        setBusy(true);
+        const blob = await (await fetch(file.uri)).blob();
+        const type = blob.type || file.mimeType || '';
+        if (blob.type && file.mimeType && blob.type !== file.mimeType) throw new Error('Receipt type does not match the selected file.');
         if (!submissionId)
-            validateTransfer(selected, cents, file ? { size: file.size ?? 0, type: file.mimeType ?? '' } : null, reference);
+            validateTransfer(selected, cents, {size: blob.size, type}, reference);
         else
             validateTransfer(['receipt'], 1, file ? { size: file.size ?? 0, type: file.mimeType ?? '' } : null, 'attachment');
         if (!submissionId && cents > outstanding)
@@ -43,13 +48,13 @@ function TransferForm() {
         if (!file)
             throw new Error('Attach a receipt.');
         setBusy(true);
-        const extension = file.mimeType === 'application/pdf' ? 'pdf' : file.mimeType === 'image/png' ? 'png' : 'jpg';
+        const extension = type === 'application/pdf' ? 'pdf' : type === 'image/png' ? 'png' : 'jpg';
         const path = uploaded || `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
         if (!uploaded) {
             const blob = await (await fetch(file.uri)).blob();
             if (blob.size <= 0 || blob.size > 5242880)
                 throw new Error('Receipt must be between 1 byte and 5 MB.');
-            await uploadReceipt(path, blob, file.mimeType ?? 'application/pdf');
+            await uploadReceipt(path, blob, type);
             setUploaded(path);
         }
         const id = await request<string>(submissionId ? '/rest/v1/rpc/attach_transfer_receipt' : '/rest/v1/rpc/submit_transfer', { method: 'POST', body: JSON.stringify(submissionId ? { p_submission: submissionId, p_path: path, p_filename: file.name } : { p_invoice: invoiceId, p_items: selected, p_amount: cents, p_reference: reference.trim(), p_path: path, p_filename: file.name }) });
