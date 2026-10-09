@@ -3,14 +3,16 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { configured, login, resetPassword } from '@/lib/api';
 import { palette } from '@/constants/palette';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     const normalizedEmail = email.trim();
     if (!normalizedEmail || !password) {
       setError('Email and password are required.');
@@ -21,8 +23,8 @@ export default function LoginScreen() {
       return;
     }
 
-    setError('');
-    router.replace('/(tabs)');
+    setBusy(true); setError('');
+    try { await login(normalizedEmail,password); router.replace('/(tabs)'); } catch(e) { setError(e instanceof Error ? e.message : 'Sign in failed.'); } finally { setBusy(false); }
   };
 
   return (
@@ -37,10 +39,10 @@ export default function LoginScreen() {
           <TextInput accessibilityLabel="Email" placeholder="you@example.com" placeholderTextColor="#999999" keyboardType="email-address" autoCapitalize="none" autoComplete="email" value={email} onChangeText={setEmail} style={styles.input} />
           <Text style={styles.label}>PASSWORD</Text>
           <TextInput accessibilityLabel="Password" placeholder="Enter your password" placeholderTextColor="#999999" secureTextEntry autoComplete="current-password" value={password} onChangeText={setPassword} style={styles.input} />
-          <Text style={styles.forgot}>Forgot password?</Text>
+          <Pressable accessibilityRole="button" onPress={async()=>{if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())){setError('Enter your email first.');return;}try{await resetPassword(email);setError('If your account exists, recovery instructions have been sent.');}catch{setError('Recovery could not be requested.');}}}><Text style={styles.forgot}>Forgot password?</Text></Pressable>
         </View>
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-        <Pressable accessibilityRole="button" onPress={handleSignIn} style={styles.button}><Text style={styles.buttonText}>Sign in</Text></Pressable>
+        <Pressable accessibilityRole="button" disabled={busy || !configured} onPress={handleSignIn} style={styles.button}><Text style={styles.buttonText}>{busy ? 'Signing in…' : 'Sign in'}</Text></Pressable>
         <Text style={styles.note}>Mock screen Â· Authentication is not connected</Text>
       </View>
     </SafeAreaView>
