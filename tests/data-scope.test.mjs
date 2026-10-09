@@ -1,2 +1,4 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {scopedValue} from '../lib/data-scope.mjs';
 test('old identity or child snapshots are never visible',()=>{const first={},second={};assert.deepEqual(scopedValue({session:first,childId:'a',value:['old']},second,'a',[]),[]);assert.deepEqual(scopedValue({session:first,childId:'a',value:['old']},first,'b',[]),[]);assert.deepEqual(scopedValue({session:first,childId:'a',value:['old']},first,'a',[]),['old']);});
+import fs from 'node:fs';
+test('service requests include identity and hide mismatched snapshots',()=>{const source=fs.readFileSync('app/(tabs)/services.tsx','utf8');assert.match(source,/\[childId, session, revision\]/);assert.match(source,/scopedValue/);});
