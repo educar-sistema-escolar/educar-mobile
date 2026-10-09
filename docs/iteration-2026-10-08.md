@@ -86,3 +86,13 @@ Whole-web lint retains four pre-existing errors in news/header pages and four ex
 - `npm audit --omit=dev --json`: reports 30 advisories (11 moderate, 19 high, no critical). All 35 affected dependency paths retain the same versions as the initial remote lockfile; none were introduced or changed by the two added native packages. No force upgrade or TLS-validation bypass was used.
 
 Additional real rendered audit by the orchestrator: two receipt links under one pending partial operation, unchanged debt after uploading, account layout, short-password rejection, sign-out routing, and missing-email recovery rejection. The second-attachment acknowledgment initially displayed a receipt ID; a narrow regression test proved the failure, then the source was corrected to retain the original operation ID and all 12 tests/export passed. The preview evidence remains synthetic and no real password mutation or mail was performed.
+
+## Orchestrator delivery verification — 22:42 Buenos Aires
+
+All three authorized main pushes were fast-forward only. Remote main identities were verified against each local HEAD: mobile `73f1d5c502a205e06c6106adb31bc8ac6bb66f26`, backend `f4d75b51c8eac39c79b952f7934168e848a3289c`, web `fe6bee838c3ed2430d940a6104966b2c3c7022e4`. Implementation comprised 37 conventional commits (17 mobile, 17 backend, 3 web); this final delivery record is an additional documentation commit.
+
+Parent independently reran the mobile tests: 12/12 passed. Final clean-load rendered audit confirmed the additional-receipt acknowledgment now retains original operation `c8a42d17-1c63-49ab-b92b-3a566a3e5479`. The preview uses synthetic localhost data, never a live financial transaction. Temporary browser viewport was restored after inspection.
+
+Goal: implement the ten adopted plans against RF-M01–18 while retaining minimalist design and auditing real rendered components. Accomplished: mobile, administration and backend source delivered to main with the checks above. Next steps: disposable Supabase migration/28 pgTAP execution, live authorization/storage/recovery integration, configured sender/scheduler verification, Android/EAS build and device acceptance, and baseline dependency advisory remediation. These remain required before claiming a finished production application.
+
+Persistent memory writes were suspended by the host after compaction because runtime registration was not confirmed; no session identity was invented or substituted. This document preserves the delivery facts but does not claim successful persistent-memory capture.
