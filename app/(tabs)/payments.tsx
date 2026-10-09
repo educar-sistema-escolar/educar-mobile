@@ -1,71 +1,12 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-
-import { Card, ScreenShell } from '@/components/screen-shell';
-import { SectionTitle } from '@/components/section-title';
-import { balances } from '@/constants/mock-data';
-import { palette } from '@/constants/palette';
-
-export default function PaymentsScreen() {
-  return (
-    <ScreenShell>
-      <View style={styles.heading}><Text style={styles.eyebrow}>FINANCES</Text><Text style={styles.title}>Payments</Text><Text style={styles.subtitle}>Invoices, balances and transfer receipts.</Text></View>
-      <Card style={styles.totalCard}>
-        <Text style={styles.label}>TOTAL OUTSTANDING</Text>
-        <Text style={styles.total}>$ 42,000</Text>
-        <Text style={styles.subtle}>1 pending item · Updated today</Text>
-      </Card>
-      <SectionTitle title="This month" action="March 2026" />
-      {balances.map((item) => (
-        <Card key={item.label} style={styles.itemCard}>
-          <View style={styles.itemTop}><Text style={styles.itemTitle}>{item.label}</Text><Text style={[styles.status, item.status === 'Due' ? styles.due : styles.paid]}>{item.status}</Text></View>
-          <View style={styles.itemBottom}><Text style={styles.subtle}>{item.due}</Text><Text style={styles.amount}>{item.amount}</Text></View>
-        </Card>
-      ))}
-      <SectionTitle title="Transfer receipts" action="2 files" />
-      <Card style={styles.itemCard}>
-        <View style={styles.itemTop}>
-          <Text style={styles.itemTitle}>March tuition · INV-2026-03</Text>
-          <Text style={styles.receiptCount}>2</Text>
-        </View>
-        <View style={styles.receiptRow}>
-          <Text style={styles.subtle}>transfer-0302.pdf</Text>
-          <Text style={styles.receiptStatus}>Received</Text>
-        </View>
-        <View style={styles.receiptRow}>
-          <Text style={styles.subtle}>transfer-0305.pdf</Text>
-          <Text style={styles.receiptStatus}>Received</Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => Alert.alert('Demo only', 'Receipt upload will be connected to the file picker.')}
-          style={styles.uploadButton}>
-          <Text style={styles.uploadText}>＋ Attach another receipt</Text>
-        </Pressable>
-      </Card>
-    </ScreenShell>
-  );
+import { useState } from 'react';
+import { router } from 'expo-router';
+import { Linking,Pressable,StyleSheet,Text,TextInput,View } from 'react-native';
+import { Card,ScreenShell } from '@/components/screen-shell';
+import { ChildSelector } from '@/components/child-selector';
+import { money,useInvoices } from '@/lib/family';
+import { receiptUrl } from '@/lib/api';
+import { validatePeriod } from '@/lib/validation.mjs';
+export default function Payments(){const {invoices,transfers,error,loading,reload}=useInvoices();const [start,setStart]=useState(`${new Date().getFullYear()}-01-01`);const [end,setEnd]=useState(`${new Date().getFullYear()}-12-31`);const [period,setPeriod]=useState([start,end]);const [message,setMessage]=useState('');const filtered=invoices.filter(i=>i.period>=period[0]&&i.period<=period[1]);
+ return <ScreenShell><Text style={styles.title}>Payments</Text><Text style={styles.muted}>Invoices, debt and bank transfer receipts.</Text><ChildSelector/><Card><Text style={styles.label}>PERIOD · YYYY-MM-DD</Text><View style={styles.row}><TextInput accessibilityLabel="Period start" value={start} onChangeText={setStart} style={styles.input}/><TextInput accessibilityLabel="Period end" value={end} onChangeText={setEnd} style={styles.input}/></View><Pressable accessibilityRole="button" style={styles.button} onPress={()=>{try{validatePeriod(start,end);setPeriod([start,end]);setMessage('');}catch(e){setMessage(e instanceof Error?e.message:'Invalid dates.');}}}><Text style={styles.white}>Apply period</Text></Pressable></Card>{message?<Text accessibilityRole="alert">{message}</Text>:null}{loading?<Text>Loading invoices…</Text>:null}{error?<Pressable onPress={reload}><Text accessibilityRole="alert">{error} Tap to retry.</Text></Pressable>:null}{!loading&&!error&&!filtered.length?<Card><Text style={styles.muted}>No invoices in this period.</Text></Card>:null}{filtered.map(invoice=>{const total=invoice.invoice_items.reduce((n,i)=>n+i.amount_cents-i.paid_cents,0);const operations=transfers.filter(t=>t.invoice_id===invoice.id);return <Card key={invoice.id}><View style={styles.row}><Text style={styles.section}>Invoice · {invoice.period.slice(0,7)}</Text><Text>{total>0?'Outstanding':'Paid'}</Text></View><Text style={styles.muted}>Due {invoice.due_date} · {money(total)} remaining</Text>{invoice.invoice_items.map(item=><View style={styles.item} key={item.id}><Text style={{flex:1}}>{item.label}</Text><Text>{money(item.amount_cents-item.paid_cents)}</Text></View>)}{total>0?<Pressable accessibilityRole="button" style={styles.button} onPress={()=>router.push({pathname:'/transfer',params:{invoiceId:invoice.id}})}><Text style={styles.white}>Record bank transfer</Text></Pressable>:null}{operations.map(t=><View key={t.id} style={{marginTop:18,gap:8}}><Text style={styles.section}>{t.reference} · {t.status}</Text><Text style={styles.muted}>{money(t.amount_cents)} · {t.created_at.slice(0,10)}</Text>{t.transfer_receipts.map(receipt=><Pressable accessibilityRole="link" key={receipt.id} onPress={async()=>{try{await Linking.openURL(await receiptUrl(receipt.storage_path));}catch{setMessage('Receipt could not be opened.');}}}><Text style={{textDecorationLine:'underline'}}>{receipt.filename}</Text></Pressable>)}{t.status==='pending'?<Pressable onPress={()=>router.push({pathname:'/transfer',params:{invoiceId:invoice.id,submissionId:t.id}})}><Text style={{fontWeight:'600'}}>＋ Add another receipt</Text></Pressable>:null}</View>)}</Card>})}</ScreenShell>;
 }
-
-const styles = StyleSheet.create({
-  heading: { gap: 5, marginBottom: 2 },
-  eyebrow: { fontSize: 10, letterSpacing: 1.4, color: palette.muted, fontWeight: '700' },
-  title: { fontSize: 30, fontWeight: '700', letterSpacing: -0.8, color: palette.ink },
-  subtitle: { fontSize: 14, color: palette.muted },
-  totalCard: { backgroundColor: palette.ink, borderColor: palette.ink },
-  label: { fontSize: 10, color: '#BEBEBE', fontWeight: '700', letterSpacing: 1.2 },
-  total: { fontSize: 32, fontWeight: '700', color: palette.paper, marginTop: 8 },
-  subtle: { color: palette.muted, fontSize: 13, marginTop: 5 },
-  itemCard: { gap: 14 },
-  itemTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  itemTitle: { fontSize: 15, fontWeight: '600', color: palette.ink },
-  status: { fontSize: 11, fontWeight: '700', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, overflow: 'hidden' },
-  due: { color: palette.paper, backgroundColor: palette.ink },
-  paid: { color: palette.ink, backgroundColor: palette.soft },
-  itemBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  amount: { fontSize: 15, fontWeight: '700', color: palette.ink },
-  receiptCount: { color: palette.muted, fontSize: 12, fontWeight: '600' },
-  receiptRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  receiptStatus: { color: palette.muted, fontSize: 11, fontWeight: '600' },
-  uploadButton: { borderWidth: 1, borderColor: palette.line, borderRadius: 12, padding: 13, alignItems: 'center', marginTop: 2 },
-  uploadText: { color: palette.ink, fontSize: 13, fontWeight: '600' },
-});
+const styles=StyleSheet.create({title:{fontSize:30,fontWeight:'700'},section:{fontSize:15,fontWeight:'600'},label:{fontSize:10,letterSpacing:1,color:'#777'},muted:{fontSize:13,color:'#777',lineHeight:20,marginTop:6},row:{flexDirection:'row',justifyContent:'space-between',gap:8,alignItems:'center'},input:{flex:1,borderWidth:1,borderColor:'#ddd',borderRadius:10,padding:12,marginVertical:12},button:{backgroundColor:'#111',padding:14,borderRadius:12,alignItems:'center',marginTop:12},white:{color:'#fff',fontWeight:'600'},item:{flexDirection:'row',justifyContent:'space-between',gap:8,borderTopWidth:1,borderColor:'#eee',paddingTop:12,marginTop:12}});
