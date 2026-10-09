@@ -7,3 +7,4 @@ const source=ts.createSourceFile('transfer.tsx',fs.readFileSync('app/transfer.ts
 function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(source)==='setConfirmation')expression=node.arguments[0].getText(source);ts.forEachChild(node,visit);}visit(source);
 test('additional receipt acknowledgment retains original operation ID',()=>assert.equal(vm.runInNewContext(expression,{submissionId:'original-operation',id:'new-receipt'}),'original-operation'));
 test('new submission acknowledgment uses returned operation ID',()=>assert.equal(vm.runInNewContext(expression,{submissionId:undefined,id:'new-operation'}),'new-operation'));
+test('route changes remount the transfer draft and busy controls cannot mutate it',()=>{const source=fs.readFileSync('app/transfer.tsx','utf8');assert.match(source,/<TransferForm key=/);assert.match(source,/editable=\{!busy\}/);assert.match(source,/disabled=\{busy\}.*Choose file/s);});
