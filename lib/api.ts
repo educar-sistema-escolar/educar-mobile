@@ -40,7 +40,8 @@ async function rawRequest<T>(path: string, options: RequestInit = {}): Promise<T
     try {
         const response = await fetch(`${url}${path}`, { ...options, signal: controller.signal, headers: { apikey: key, Authorization: `Bearer ${session?.access_token ?? key}`, 'Content-Type': 'application/json', ...options.headers } });
         const body = await response.text();
-        const data = body ? JSON.parse(body) : null;
+        let data;
+        try { data = body ? JSON.parse(body) : null; } catch { if (!response.ok) throw new Error(body.slice(0, 200) || 'Request failed. Please try again.'); throw new Error('The server returned an invalid response.'); }
         if (!response.ok)
             throw new Error(data?.msg ?? data?.message ?? 'Request failed. Please try again.');
         return data as T;
@@ -130,9 +131,13 @@ export async function uploadReceipt(path: string, blob: Blob, type: string) {
         await refreshSession();
     if (!session)
         throw new Error('Sign in again before uploading.');
-    const response = await fetch(`${url}/storage/v1/object/transfer-receipts/${path}`, { method: 'POST', headers: { apikey: key, Authorization: `Bearer ${session?.access_token}`, 'Content-Type': type, 'x-upsert': 'false' }, body: blob });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+    const response = await fetch(`${url}/storage/v1/object/transfer-receipts/${path}`, { method: 'POST', headers: { apikey: key, Authorization: `Bearer ${session?.access_token}`, 'Content-Type': type, 'x-upsert': 'false' }, body: blob, signal: controller.signal });
     if (!response.ok)
         throw new Error('Receipt upload failed. Please try again.');
+    } finally { clearTimeout(timer); }
 }
 export async function receiptUrl(path: string) {
     const result = await request<{
