@@ -26,12 +26,15 @@ export default function RootLayout() {
 
     <AuthProvider><FamilyProvider><ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
 
-      <Stack screenOptions={{ contentStyle: { backgroundColor: '#FFFFFF' } }}>
+      <Stack screenOptions={{ contentStyle: { backgroundColor: '#FFFFFF' },headerStyle:{backgroundColor:'#FFFFFF'},headerTintColor:'#111111',headerShadowVisible:false }}>
 
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
         <Stack.Screen name="login" options={{ headerShown: false }} />
 
+        <Stack.Screen name="account" options={{title:'Your account',headerBackTitle:'Back'}} />
+        <Stack.Screen name="transfer" options={{title:'Bank transfer',headerBackTitle:'Back'}} />
+        <Stack.Screen name="recovery" options={{title:'Password recovery'}} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
 
       </Stack>
