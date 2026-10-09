@@ -42,18 +42,12 @@ function TransferForm() {
         if (!submissionId)
             validateTransfer(selected, cents, {size: blob.size, type}, reference);
         else
-            validateTransfer(['receipt'], 1, file ? { size: file.size ?? 0, type: file.mimeType ?? '' } : null, 'attachment');
+            validateTransfer(['receipt'], 1, {size: blob.size, type}, 'attachment');
         if (!submissionId && cents > outstanding)
             throw new Error('Amount cannot exceed selected outstanding concepts.');
-        if (!file)
-            throw new Error('Attach a receipt.');
-        setBusy(true);
         const extension = type === 'application/pdf' ? 'pdf' : type === 'image/png' ? 'png' : 'jpg';
         const path = uploaded || `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
         if (!uploaded) {
-            const blob = await (await fetch(file.uri)).blob();
-            if (blob.size <= 0 || blob.size > 5242880)
-                throw new Error('Receipt must be between 1 byte and 5 MB.');
             await uploadReceipt(path, blob, type);
             setUploaded(path);
         }
