@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 export type Session = { access_token: string; refresh_token: string; expires_at: number; user: { id: string }; name: string };
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
-export const configured = /^https:\/\//.test(url) && !!key;
+export const configured = (/^https:\/\//.test(url) || (__DEV__ && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(url))) && !!key;
 let session: Session | null = null;
 const subscribers = new Set<() => void>();
 export const currentSession = () => session;
