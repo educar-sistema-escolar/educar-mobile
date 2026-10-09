@@ -145,10 +145,11 @@ export async function receiptUrl(path: string) {
     }>(`/storage/v1/object/sign/transfer-receipts/${path}`, { method: 'POST', body: JSON.stringify({ expiresIn: 60 }) });
     return `${url}/storage/v1${result.signedURL}`;
 }
-export async function acceptRecovery(accessToken: string, refreshToken: string) {
+export async function acceptRecovery(accessToken: string, refreshToken: string, active: () => boolean = () => true) {
     const expected = ++generation;
     const user = await rawRequest<{
         id: string;
     }>('/auth/v1/user', { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!active()) return;
     await verifySession({ access_token: accessToken, refresh_token: refreshToken, expires_at: Date.now() + 300000, user, name: '' }, expected);
 }
