@@ -1,41 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
-
-import { Card, ScreenShell } from '@/components/screen-shell';
-import { SectionTitle } from '@/components/section-title';
-import { services, student } from '@/constants/mock-data';
-import { palette } from '@/constants/palette';
-
-export default function ServicesScreen() {
-  return (
-    <ScreenShell>
-      <View style={styles.heading}><Text style={styles.eyebrow}>STUDENT PROFILE</Text><Text style={styles.title}>Services</Text><Text style={styles.subtitle}>Current enrollments for {student.name}.</Text></View>
-      <Card style={styles.studentCard}><Text style={styles.student}>{student.name}</Text><Text style={styles.detail}>{student.grade}</Text></Card>
-      <SectionTitle title="Enrolled services" />
-      {services.map((service, index) => (
-        <Card key={service.title} style={styles.serviceCard}>
-          <View style={styles.icon}><Text style={styles.iconText}>{['S', 'T', 'L'][index]}</Text></View>
-          <View style={styles.copy}><Text style={styles.serviceTitle}>{service.title}</Text><Text style={styles.detail}>{service.detail}</Text></View>
-          <Text style={styles.status}>{service.status}</Text>
-        </Card>
-      ))}
-      <Text style={styles.footnote}>Changes to service enrollment are managed by the school.</Text>
-    </ScreenShell>
-  );
+import { useEffect,useState } from 'react';
+import { Pressable,Text,View } from 'react-native';
+import { Card,ScreenShell } from '@/components/screen-shell';
+import { ChildSelector } from '@/components/child-selector';
+import { request } from '@/lib/api';
+import { useFamily } from '@/lib/family';
+type Entry={id:string;sport_groups?:{name:string;sports:{name:string};sport_group_schedules:{day_of_week:number;starts_at:string;ends_at:string}[]};transport_routes?:{name:string;route_number:number};dining_services?:{name:string}};
+export default function Services(){const {childId}=useFamily();const [groups,setGroups]=useState<{title:string;entries:Entry[]}[]>([]);const [error,setError]=useState('');const [loading,setLoading]=useState(false);const [revision,setRevision]=useState(0);
+ useEffect(()=>{setGroups([]);if(!childId)return;let active=true;setLoading(true);Promise.all([request<Entry[]>(`/rest/v1/student_sport_enrollments?student_id=eq.${childId}&is_active=eq.true&select=id,sport_groups(name,sports(name),sport_group_schedules(day_of_week,starts_at,ends_at))`),request<Entry[]>(`/rest/v1/student_transport_enrollments?student_id=eq.${childId}&is_active=eq.true&select=id,transport_routes(name,route_number)`),request<Entry[]>(`/rest/v1/student_dining_enrollments?student_id=eq.${childId}&is_active=eq.true&select=id,dining_services(name)`)]).then(([sports,transport,dining])=>{if(active){setGroups([{title:'Sports',entries:sports},{title:'Transport',entries:transport},{title:'School lunch',entries:dining}]);setError('');}}).catch(()=>{if(active)setError('Services could not be loaded.');}).finally(()=>{if(active)setLoading(false);});return()=>{active=false};},[childId,revision]);
+ return <ScreenShell><Text style={{fontSize:30,fontWeight:'700'}}>Services</Text><Text style={{color:'#777'}}>Current school enrollments.</Text><ChildSelector/>{loading?<Text>Loading services…</Text>:null}{error?<Pressable onPress={()=>setRevision(n=>n+1)}><Text accessibilityRole="alert">{error} Tap to retry.</Text></Pressable>:null}{groups.map(group=><View key={group.title} style={{gap:12}}><Text style={{fontWeight:'600',fontSize:16}}>{group.title}</Text>{!group.entries.length?<Card><Text style={{color:'#777'}}>No active enrollment.</Text></Card>:group.entries.map(entry=><Card key={entry.id}><Text style={{fontWeight:'600'}}>{entry.sport_groups?.sports.name ?? entry.transport_routes?.name ?? entry.dining_services?.name}</Text>{entry.sport_groups?<Text style={{color:'#777',marginTop:6}}>{entry.sport_groups.name} · {entry.sport_groups.sport_group_schedules.map(s=>`${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][s.day_of_week]} ${s.starts_at.slice(0,5)}`).join(', ')}</Text>:null}{entry.transport_routes?<Text style={{color:'#777',marginTop:6}}>Route {entry.transport_routes.route_number}</Text>:null}</Card>)}</View>)}<Text style={{color:'#777',fontSize:12}}>Enrollment changes are managed by the school.</Text></ScreenShell>;
 }
-
-const styles = StyleSheet.create({
-  heading: { gap: 5, marginBottom: 2 },
-  eyebrow: { fontSize: 10, letterSpacing: 1.4, color: palette.muted, fontWeight: '700' },
-  title: { fontSize: 30, fontWeight: '700', letterSpacing: -0.8, color: palette.ink },
-  subtitle: { fontSize: 14, color: palette.muted },
-  studentCard: { backgroundColor: palette.soft, borderColor: palette.soft },
-  student: { fontSize: 16, fontWeight: '700', color: palette.ink },
-  detail: { fontSize: 12, color: palette.muted, marginTop: 5, flexShrink: 1 },
-  serviceCard: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  icon: { width: 38, height: 38, borderRadius: 12, backgroundColor: palette.soft, alignItems: 'center', justifyContent: 'center' },
-  iconText: { fontSize: 14, fontWeight: '700', color: palette.ink },
-  copy: { flex: 1 },
-  serviceTitle: { fontSize: 15, fontWeight: '600', color: palette.ink },
-  status: { fontSize: 10, fontWeight: '600', color: palette.muted },
-  footnote: { fontSize: 12, lineHeight: 18, color: palette.muted, textAlign: 'center', marginHorizontal: 20 },
-});
