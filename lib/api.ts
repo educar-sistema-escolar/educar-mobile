@@ -12,8 +12,7 @@ export const currentSession = () => session;
 export function subscribe(callback: () => void) { subscribers.add(callback); return () => { subscribers.delete(callback); }; }
 async function store(value: Session | null) {
  session=value;
- if(Platform.OS !== 'web') { if(value) await SecureStore.setItemAsync('educar-session',JSON.stringify(value)); else await SecureStore.deleteItemAsync('educar-session'); }
- subscribers.forEach(fn=>fn());
+ try {if(Platform.OS !== 'web') { if(value) await SecureStore.setItemAsync('educar-session',JSON.stringify(value)); else await SecureStore.deleteItemAsync('educar-session'); }} finally {subscribers.forEach(fn=>fn());}
 }
 async function rawRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
  if(!configured) throw new Error('Connect Supabase using the public environment configuration.');
@@ -54,7 +53,7 @@ export async function restoreSession() {
  } catch {await store(null);}
 }
 export async function logout() { try {if(session)await request('/auth/v1/logout',{method:'POST'});} finally {await store(null);} }
-export const resetPassword=(email:string)=>request('/auth/v1/recover',{method:'POST',body:JSON.stringify({email:email.trim().toLowerCase(),redirect_to:process.env.EXPO_PUBLIC_PASSWORD_RESET_URL || 'educar://recovery'})});
+export const resetPassword=(email:string)=>request(`/auth/v1/recover?redirect_to=${encodeURIComponent(process.env.EXPO_PUBLIC_PASSWORD_RESET_URL || 'educar://recovery')}`,{method:'POST',body:JSON.stringify({email:email.trim().toLowerCase()})});
 export const changePassword=(password:string)=>request('/auth/v1/user',{method:'PUT',body:JSON.stringify({password})});
 export async function uploadReceipt(path:string,blob:Blob,type:string) {
  if(session&&session.expires_at<Date.now()+60000)await refreshSession();
