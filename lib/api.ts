@@ -14,6 +14,7 @@ const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 export const configured = (/^https:\/\//.test(url) || (__DEV__ && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(url))) && !!key;
 let session: Session | null = null;
+let generation = 0;
 const subscribers = new Set<() => void>();
 export const currentSession = () => session;
 export function subscribe(callback: () => void) { subscribers.add(callback); return () => { subscribers.delete(callback); }; }
@@ -48,41 +49,44 @@ async function rawRequest<T>(path: string, options: RequestInit = {}): Promise<T
         clearTimeout(timer);
     }
 }
-async function verifySession(value: Session) {
-    session = value;
+async function verifySession(value: Session, expected = generation) {
+    if (expected !== generation) throw new Error('Authentication changed. Please try again.');
     try {
         const profiles = await rawRequest<{
             full_name: string;
             role: string;
             is_active: boolean;
             account_status: string;
-        }[]>(`/rest/v1/profiles?id=eq.${value.user.id}&select=full_name,role,is_active,account_status`);
+        }[]>(`/rest/v1/profiles?id=eq.${value.user.id}&select=full_name,role,is_active,account_status`, { headers: { Authorization: `Bearer ${value.access_token}` } });
         const profile = profiles[0];
         if (!profile?.is_active || profile.account_status !== 'active' || !['guardian', 'parent'].includes(profile.role))
             throw new Error('An active family account is required. Administration is available on the web.');
         value.name = profile.full_name;
+        if (expected !== generation) throw new Error('Authentication changed. Please try again.');
         await store(value);
     }
     catch (error) {
-        await store(null);
+        if (expected === generation) await store(null);
         throw error;
     }
 }
 export async function login(email: string, password: string) {
+    const expected = ++generation;
     const value = await request<Session & {
         expires_in: number;
     }>('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email: email.trim().toLowerCase(), password }) });
     value.expires_at = Date.now() + value.expires_in * 1000;
-    await verifySession(value);
+    await verifySession(value, expected);
 }
 export const refreshSession = singleFlight(async () => {
     if (!session)
         return;
+    const expected = generation;
     try {
         const refreshed = await rawRequest<Session & {
             expires_in: number;
         }>('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: JSON.stringify({ refresh_token: session.refresh_token }) });
-        await verifySession({ ...refreshed, expires_at: Date.now() + refreshed.expires_in * 1000 });
+        await verifySession({ ...refreshed, expires_at: Date.now() + refreshed.expires_in * 1000 }, expected);
     }
     catch (error) {
         await store(null);
@@ -94,6 +98,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 export async function restoreSession() {
     if (Platform.OS === 'web' || !configured)
         return;
+    const expected = generation;
     try {
         const stored = await SecureStore.getItemAsync('educar-session');
         if (!stored)
@@ -108,10 +113,10 @@ export async function restoreSession() {
         await verifySession(value);
     }
     catch {
-        await store(null);
+        if (expected === generation) await store(null);
     }
 }
-export async function logout() { try {
+export async function logout() { generation++; try {
     if (session)
         await request('/auth/v1/logout', { method: 'POST' });
 }
@@ -136,8 +141,9 @@ export async function receiptUrl(path: string) {
     return `${url}/storage/v1${result.signedURL}`;
 }
 export async function acceptRecovery(accessToken: string, refreshToken: string) {
+    const expected = ++generation;
     const user = await rawRequest<{
         id: string;
     }>('/auth/v1/user', { headers: { Authorization: `Bearer ${accessToken}` } });
-    await verifySession({ access_token: accessToken, refresh_token: refreshToken, expires_at: Date.now() + 300000, user, name: '' });
+    await verifySession({ access_token: accessToken, refresh_token: refreshToken, expires_at: Date.now() + 300000, user, name: '' }, expected);
 }
