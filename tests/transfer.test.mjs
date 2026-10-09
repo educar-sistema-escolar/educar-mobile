@@ -1,0 +1,9 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+const source=ts.createSourceFile('transfer.tsx',fs.readFileSync('app/transfer.tsx','utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let expression;
+function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(source)==='setConfirmation')expression=node.arguments[0].getText(source);ts.forEachChild(node,visit);}visit(source);
+test('additional receipt acknowledgment retains original operation ID',()=>assert.equal(vm.runInNewContext(expression,{submissionId:'original-operation',id:'new-receipt'}),'original-operation'));
+test('new submission acknowledgment uses returned operation ID',()=>assert.equal(vm.runInNewContext(expression,{submissionId:undefined,id:'new-operation'}),'new-operation'));

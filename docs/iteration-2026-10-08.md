@@ -36,10 +36,10 @@ One orchestrator and one implementation worker. Existing minimalist English mobi
 
 - Initial `npx tsc --noEmit`: failed on existing SDK57 type incompatibilities. Navigation additionally failed in a real preview due obsolete React Navigation imports; migrated to Expo Router exports rather than suppressing compatibility checks.
 - Validation and single-flight money tests recorded failing missing-module runs before implementation, then passed.
-- `node --test tests/*.test.mjs`: 8 passed, including real auth module under mocked network/storage boundaries.
+- `node --test tests/*.test.mjs`: 12 passed after date and receipt-identity correction, including real auth module under mocked network/storage boundaries.
 - `npm run lint` and `npx tsc --noEmit`: passed during implementation; final normalized-source checks recorded in handoff.
 - Web `npm run build`: passed (large existing bundle warning). Whole-web `npm run lint`: failed on existing pages plus one introduced billing effect error, subsequently fixed; scoped changed-file lint is required.
-- `supabase test db`: did not pass; cancelled after no response. Docker daemon unavailable (`dockerDesktopLinuxEngine` pipe missing). SQL pgTAP source contains structure/denial tests plus 12 ownership, foreign concepts, idempotency, pending/approved allocation and inactive-parent scenarios. These are NOT executed DB proof.
+- `supabase test db`: did not pass; cancelled after no response. Docker daemon unavailable (`dockerDesktopLinuxEngine` pipe missing). SQL pgTAP source contains 10 structure/denial tests plus 18 ownership, foreign concepts, idempotency, pending/approved allocation and inactive-parent scenarios. These are NOT executed DB proof.
 - Expo preview uses an explicit localhost fixture API through the same client auth/query routes. It provides synthetic client-flow/visual evidence only, not database policy evidence.
 
 ## Safe synthetic preview
@@ -62,3 +62,27 @@ HTTP backend URLs are accepted only for loopback during development. Production 
 ## Commit evidence
 
 Implementation commits were created in three existing repositories; main integration/push is owned by the orchestrator. Complete commit IDs can be recovered with `git log --since=2026-10-08 --oneline` in each repository. Notable checkpoints: mobile `8f4eac4`, `41ed05e`, `bd2045b`, `caffe99`, `1ac10c3`, `4716c52`, `7231c17`, `6110900`, `e76d2c9`, `13b5869`, `d4f73d7`; server `4ad3a00`, `8622aea`, `eb0051b`, `904ad9e`, `f9d3b11`, `c0b4c71`, `662bf76`, `a53eee1`, `7f76ffa`, `2e2aa20`; web `d6afcbe` plus evidence/select usability fix. No empty commits or AI attribution.
+
+## Final audit additions
+
+The orchestrator subsequently rendered the production components at 390×844 through the explicit fixture API and verified login, home, services, invoices, date validation, selected concepts, PDF selection, excessive-amount rejection and partial pending submission. Audit findings led to SDK navigation migration, date-input minimum-width correction, native/web checkbox accessibility, truthful configuration states and Buenos Aires timestamp display. These checks are synthetic client-flow evidence, not PostgreSQL or Android proof.
+
+Backend worker mock tests: `node --test tests/billing-reminders.test.mjs` passed 4 cases, including 51-message drainage over two calls, secret rejection, PDF generation requeue and ambiguous provider outcome retention. There are 28 authored pgTAP assertions, still unexecuted because the local database is unavailable. Source normalization used the installed TypeScript printer before final checks.
+
+Whole-web lint retains four pre-existing errors in news/header pages and four existing warnings; the introduced billing-effect issue was corrected and changed-file lint passes. A previously completed mobile web export generated 13 static routes; the final normalized-source export is tracked in the final handoff.
+
+## Final check receipt (before orchestrator push)
+
+- Mobile `npm run lint`: PASS.
+- Mobile `npx tsc --noEmit`: PASS.
+- Mobile `node --test tests/*.test.mjs`: PASS, 12/12.
+- Mobile `npx expo export --platform web`: PASS, 13 static routes generated from the final receipt-identity fix.
+- Web `npx eslint src/pages/admin/BillingPage.tsx src/pages/admin/AdminLayout.tsx src/App.tsx`: PASS.
+- Web `npm run build`: PASS; existing large-bundle warnings remain.
+- Backend `node --test tests/billing-reminders.test.mjs`: PASS, 4/4 under mocked provider/database/PDF boundaries.
+- Backend Edge worker TypeScript syntax: PASS, not Deno deployment proof.
+- PostgreSQL `supabase test db`: UNAVAILABLE / NOT PASSED (cancelled after no response; Docker daemon missing).
+- Native Android, real Auth recovery mail, live database/storage and scheduled email: NOT VERIFIED.
+- `npm audit --omit=dev --json`: reports 30 advisories (11 moderate, 19 high, no critical). All 35 affected dependency paths retain the same versions as the initial remote lockfile; none were introduced or changed by the two added native packages. No force upgrade or TLS-validation bypass was used.
+
+Additional real rendered audit by the orchestrator: two receipt links under one pending partial operation, unchanged debt after uploading, account layout, short-password rejection, sign-out routing, and missing-email recovery rejection. The second-attachment acknowledgment initially displayed a receipt ID; a narrow regression test proved the failure, then the source was corrected to retain the original operation ID and all 12 tests/export passed. The preview evidence remains synthetic and no real password mutation or mail was performed.
