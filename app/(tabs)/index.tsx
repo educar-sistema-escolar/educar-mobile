@@ -1,3 +1,5 @@
+import { demoEnabled } from '@/lib/demo';
+import { DemoHome } from '@/components/demo-screens';
 import { schoolDate } from '@/lib/date.mjs';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -5,7 +7,8 @@ import { Card, ScreenShell } from '@/components/screen-shell';
 import { ChildSelector } from '@/components/child-selector';
 import { useInvoices, money } from '@/lib/family';
 import { useAuth } from '@/lib/auth';
-export default function HomeScreen() {
+export default function ScreenEntry() { return demoEnabled ? <DemoHome /> : <LegacyScreen />; }
+function LegacyScreen() {
     const { session } = useAuth();
     const { invoices, transfers, error, loading, reload } = useInvoices();
     const debt = invoices.flatMap(i => i.invoice_items).reduce((n, i) => n + i.amount_cents - i.paid_cents, 0);

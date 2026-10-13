@@ -1,3 +1,5 @@
+import { demoEnabled } from '@/lib/demo';
+import { DemoPayments } from '@/components/demo-screens';
 import { schoolDate } from '@/lib/date.mjs';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -7,7 +9,8 @@ import { ChildSelector } from '@/components/child-selector';
 import { money, useInvoices } from '@/lib/family';
 import { receiptUrl } from '@/lib/api';
 import { validatePeriod } from '@/lib/validation.mjs';
-export default function Payments() {
+export default function ScreenEntry() { return demoEnabled ? <DemoPayments /> : <LegacyScreen />; }
+function LegacyScreen() {
     const { invoices, transfers, error, loading, reload } = useInvoices();
     const [start, setStart] = useState(`${new Date().getFullYear()}-01-01`);
     const [end, setEnd] = useState(`${new Date().getFullYear()}-12-31`);

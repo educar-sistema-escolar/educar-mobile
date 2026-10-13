@@ -1,3 +1,5 @@
+import { demoEnabled } from '@/lib/demo';
+import { DemoTransfer } from '@/components/demo-screens';
 import { useState } from 'react';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
@@ -8,7 +10,8 @@ import { money, useInvoices, useFamily } from '@/lib/family';
 import { request, uploadReceipt } from '@/lib/api';
 import { parseMoney } from '@/lib/session-tools.mjs';
 import { validateTransfer } from '@/lib/validation.mjs';
-export default function Transfer() { const params=useLocalSearchParams<{invoiceId:string;submissionId?:string}>();const {session}=useAuth();const {childId}=useFamily();return <TransferForm key={JSON.stringify([session?.user.id,childId,params.invoiceId,params.submissionId])}/>; }
+export default function ScreenEntry() { return demoEnabled ? <DemoTransfer /> : <LegacyScreen />; }
+function LegacyScreen() { const params=useLocalSearchParams<{invoiceId:string;submissionId?:string}>();const {session}=useAuth();const {childId}=useFamily();return <TransferForm key={JSON.stringify([session?.user.id,childId,params.invoiceId,params.submissionId])}/>; }
 function TransferForm() {
     const { session, ready } = useAuth();
     const { invoiceId, submissionId } = useLocalSearchParams<{

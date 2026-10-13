@@ -1,10 +1,13 @@
+import { demoEnabled } from '@/lib/demo';
+import { DemoLogin } from '@/components/demo-screens';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { configured, login, resetPassword } from '@/lib/api';
 import { palette } from '@/constants/palette';
-export default function LoginScreen() {
+export default function ScreenEntry() { return demoEnabled ? <DemoLogin /> : <LegacyScreen />; }
+function LegacyScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');

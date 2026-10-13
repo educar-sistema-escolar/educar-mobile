@@ -1,3 +1,5 @@
+import { demoEnabled } from '@/lib/demo';
+import { DemoServices } from '@/components/demo-screens';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Card, ScreenShell } from '@/components/screen-shell';
@@ -6,6 +8,7 @@ import { request } from '@/lib/api';
 import { useFamily } from '@/lib/family';
 import { useAuth } from '@/lib/auth';
 import { scopedValue } from '@/lib/data-scope.mjs';
+export default function ScreenEntry() { return demoEnabled ? <DemoServices /> : <LegacyScreen />; }
 type Entry = {
     id: string;
     sport_groups?: {
@@ -27,7 +30,7 @@ type Entry = {
         name: string;
     };
 };
-export default function Services() {
+function LegacyScreen() {
     const { childId } = useFamily();
     const {session}=useAuth();
     const [scope,setScope]=useState<{session:typeof session;childId:string}|null>(null);

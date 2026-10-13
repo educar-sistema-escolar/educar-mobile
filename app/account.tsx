@@ -1,10 +1,13 @@
+import { demoEnabled } from '@/lib/demo';
+import { DemoAccount } from '@/components/demo-screens';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, Text, TextInput, StyleSheet } from 'react-native';
 import { ScreenShell, Card } from '@/components/screen-shell';
 import { changePassword, logout } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-export default function Account() {
+export default function ScreenEntry() { return demoEnabled ? <DemoAccount /> : <LegacyScreen />; }
+function LegacyScreen() {
     const { session } = useAuth();
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
