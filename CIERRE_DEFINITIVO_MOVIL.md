@@ -18,3 +18,7 @@ Para presentar la versión web integrada, ejecutar Expo con las variables públi
 Se cerraron los servidores Expo duplicados y se reconstruyó la caché. Después se ejecutó `npm ci` dentro de `educar-mobile`, sin modificar manualmente `node_modules`. Pasaron lint, TypeScript, 37 pruebas, Expo Doctor 21/21 y `npm run export:web` (18 rutas). Se agregaron `web:limpio` y `export:web` para reconstruir la caché de manera reproducible. El error EINVAL no volvió a ocurrir en estas comprobaciones. OneDrive puede volver a alterar el estado local: el README documenta la recuperación.
 
 La revisión de los cambios no encontró las contraseñas locales ni claves privadas. `.env.local`, bases, temporales y exportaciones quedan fuera de Git. Permanecen los avisos de dependencias ya documentados y la prueba física de Expo Go pendiente.
+
+## Resultado de los commits y push
+
+Los tres repositorios oficiales recibieron push a `main` correctamente: móvil `4b04ef8` (Completar integración móvil, diseño institucional y cierre de pruebas), backend `5d62134` (Mejorar recordatorios de cuotas y verificar pagos parciales) y web `c153484` (Completar filtros y exportación de reportes financieros). Esta constancia se publica en un commit documental posterior. No se ejecutaron migraciones remotas, despliegues del worker ni activación de correos.

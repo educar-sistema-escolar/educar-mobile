@@ -79,3 +79,7 @@ Verificaciones adicionales: web `npm run lint`, `npm test` (23 pruebas) y `npm r
 Se completó `npm ci` en la carpeta original tras detener las instancias Expo duplicadas. Después pasaron lint, TypeScript, 37 pruebas, Expo Doctor 21/21 y exportación web con caché limpia de 18 rutas. No se aplicaron parches manuales a `node_modules`. La comprobación final sustituye el bloqueo de Metro informado anteriormente. El README incluye los comandos de recuperación.
 
 Se revisaron los archivos a publicar y se comprobaron las contraseñas locales y patrones de claves privadas sin encontrar coincidencias en los cambios. Las capturas permanecen locales; no se publican `.env.local`, temporales ni bases. Backend `5d62134` y web `c153484` fueron publicados en `main`, sin desplegar el worker ni programar correos.
+
+## Resultado de los commits y push
+
+Los tres repositorios oficiales recibieron push a `main` correctamente: móvil `4b04ef8` (Completar integración móvil, diseño institucional y cierre de pruebas), backend `5d62134` (Mejorar recordatorios de cuotas y verificar pagos parciales) y web `c153484` (Completar filtros y exportación de reportes financieros). Esta constancia se publica en un commit documental posterior. No se ejecutaron migraciones remotas, despliegues del worker ni activación de correos.
