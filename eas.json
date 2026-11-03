@@ -1,6 +1,8 @@
 {
+ "cli": {"version": ">= 16.0.0", "appVersionSource": "local"},
  "build": {
-  "preview": {"distribution":"internal","android":{"buildType":"apk"}},
+  "preview": {"distribution":"internal","android":{"buildType":"apk"},"env":{"EXPO_PUBLIC_DEMO":"false"}},
+  "demo": {"extends":"preview","env":{"EXPO_PUBLIC_DEMO":"true"}},
   "production": {"autoIncrement":true}
  }
 }

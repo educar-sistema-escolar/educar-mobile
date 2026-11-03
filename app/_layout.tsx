@@ -20,9 +20,9 @@ function LegacyRootLayout() {
 
         <Stack.Screen name="login" options={{ headerShown: false }}/>
 
-        <Stack.Screen name="account" options={{ title: 'Your account', headerBackTitle: 'Back' }}/>
-        <Stack.Screen name="transfer" options={{ title: 'Bank transfer', headerBackTitle: 'Back' }}/>
-        <Stack.Screen name="recovery" options={{ title: 'Password recovery' }}/>
+        <Stack.Screen name="account" options={{ title: 'Mi cuenta', headerBackTitle: 'Volver' }}/>
+        <Stack.Screen name="transfer" options={{ title: 'Transferencia bancaria', headerBackTitle: 'Volver' }}/>
+        <Stack.Screen name="recovery" options={{ title: 'Recuperar contraseña' }}/>
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }}/>
 
       </Stack>

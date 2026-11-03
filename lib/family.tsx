@@ -57,7 +57,7 @@ export function FamilyProvider({ children }: PropsWithChildren) {
         setError('');
         setLoading(false);
         return;
-    } setLoading(true); return request<Child[]>('/rest/v1/students?select=id,people(first_name,last_name)&is_active=eq.true').then(data => { if (active) {
+    } setLoading(true); const studentFilter = session.role === 'student' ? `&people.profile_id=eq.${encodeURIComponent(session.user.id)}` : ''; return request<Child[]>(`/rest/v1/students?select=id,people!inner(first_name,last_name)&is_active=eq.true${studentFilter}`).then(data => { if (active) {
         setListSession(session);
         setList(data);
         setChildId(previous => data.some(c => c.id === previous) ? previous : data[0]?.id ?? '');
@@ -66,13 +66,13 @@ export function FamilyProvider({ children }: PropsWithChildren) {
         setList([]);
         setChildId('');
         setListSession(session);
-        setError('Children could not be loaded. Check your connection or contact the school.');
+        setError('No se pudieron cargar los alumnos. Revisá tu conexión o contactá a la escuela.');
     } }).finally(() => { if (active)
         setLoading(false); }); }); return () => { active = false; }; }, [session, revision]);
     return <FamilyContext.Provider value={{ children: scopedValue({session:listSession,childId:'',value:list},session,'',[]), childId: listSession===session && session ? childId : '', setChildId, loading: !!session && (listSession!==session || loading), error: listSession===session ? error : '', reload: () => setRevision(x => x + 1) }}>{children}</FamilyContext.Provider>;
 }
 export const useFamily = () => useContext(FamilyContext);
-export const money = (cents: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ARS' }).format(cents / 100);
+export const money = (cents: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(cents / 100);
 export function useInvoices() {
     const { childId } = useFamily();
     const { session } = useAuth();
@@ -83,7 +83,7 @@ export function useInvoices() {
     const [loading, setLoading] = useState(false);
     const [revision, setRevision] = useState(0);
     useEffect(() => { let active = true; Promise.resolve().then(() => { if (!active)
-        return; setInvoices([]); setTransfers([]); setError(''); setLoading(!!childId); if (!childId)
+        return; setInvoices([]); setTransfers([]); setError(''); setLoading(!!childId && session?.role !== 'student'); if (!childId || session?.role === 'student')
         return; return Promise.all([request<Invoice[]>(`/rest/v1/invoices?student_id=eq.${childId}&select=*,invoice_items(*)&order=period.desc`), request<Transfer[]>('/rest/v1/transfer_submissions?select=*,transfer_receipts(*),transfer_submission_items(item_id)&order=created_at.desc')]).then(([i, t]) => { if (active) {
         setScope({session,childId});
         setInvoices(i);
@@ -91,7 +91,7 @@ export function useInvoices() {
         setError('');
     } }).catch((cause) => { if (__DEV__)
         console.warn('Financial query failed:', cause instanceof Error ? cause.message : 'unknown'); if (active)
-        { setScope({session,childId}); setError('Financial information is unavailable. Please retry.'); } }).finally(() => { if (active)
+        { setScope({session,childId}); setError('No se pudo cargar la información de cuotas. Intentá nuevamente.'); } }).finally(() => { if (active)
         setLoading(false); }); }); return () => { active = false; }; }, [childId, session, revision]);
-    return { invoices: scopedValue(scope && {...scope,value:invoices},session,childId,[]), transfers: scopedValue(scope && {...scope,value:transfers},session,childId,[]), error: scopedValue(scope && {...scope,value:error},session,childId,''), loading: !!childId && (scope?.session!==session || scope?.childId!==childId || loading), reload: () => setRevision(x => x + 1) };
+    return { invoices: scopedValue(scope && {...scope,value:invoices},session,childId,[]), transfers: scopedValue(scope && {...scope,value:transfers},session,childId,[]), error: scopedValue(scope && {...scope,value:error},session,childId,''), loading: session?.role !== 'student' && !!childId && (scope?.session!==session || scope?.childId!==childId || loading), reload: () => setRevision(x => x + 1) };
 }

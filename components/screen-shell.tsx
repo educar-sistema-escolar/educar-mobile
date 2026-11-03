@@ -1,15 +1,17 @@
 import type { PropsWithChildren } from 'react';
-import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { palette } from '@/constants/palette';
 
 export function ScreenShell({ children }: PropsWithChildren) {
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {children}
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -19,7 +21,7 @@ export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: palette.paper },
-  content: { paddingHorizontal: 22, paddingTop: 12, paddingBottom: 32, gap: 22 },
-  card: { borderWidth: 1, borderColor: palette.line, borderRadius: 18, padding: 18, backgroundColor: palette.paper },
+  safeArea: { flex: 1, backgroundColor: palette.soft },
+  content: { width: '100%', maxWidth: 600, alignSelf: 'center', paddingHorizontal: 20, paddingTop: 18, paddingBottom: 32, gap: 20 },
+  card: { borderWidth: 1, borderColor: palette.line, borderRadius: 20, padding: 18, backgroundColor: palette.paper, gap: 8 },
 });

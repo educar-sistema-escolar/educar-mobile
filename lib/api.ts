@@ -9,6 +9,7 @@ export type Session = {
         id: string;
     };
     name: string;
+    role: 'parent' | 'guardian' | 'student';
 };
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
@@ -53,9 +54,10 @@ async function verifySession(value: Session, expected = generation, active: () =
             account_status: string;
         }[]>(`/rest/v1/profiles?id=eq.${value.user.id}&select=full_name,role,is_active,account_status`, { headers: { Authorization: `Bearer ${value.access_token}` } });
         const profile = profiles[0];
-        if (!profile?.is_active || profile.account_status !== 'active' || !['guardian', 'parent'].includes(profile.role))
-            throw new Error('An active family account is required. Administration is available on the web.');
+        if (!profile?.is_active || profile.account_status !== 'active' || !['guardian', 'parent', 'student'].includes(profile.role))
+            throw new Error('An active family or student account is required. Administration is available on the web.');
         value.name = profile.full_name;
+        value.role = profile.role as Session['role'];
         if (expected !== generation || !active()) throw new Error('Authentication changed. Please try again.');
         await store(value);
     }
@@ -141,5 +143,5 @@ export async function acceptRecovery(accessToken: string, refreshToken: string, 
         id: string;
     }>('/auth/v1/user', { headers: { Authorization: `Bearer ${accessToken}` } });
     if (!active()) return;
-    await verifySession({ access_token: accessToken, refresh_token: refreshToken, expires_at: Date.now() + 300000, user, name: '' }, expected, active);
+    await verifySession({ access_token: accessToken, refresh_token: refreshToken, expires_at: Date.now() + 300000, user, name: '', role: 'student' }, expected, active);
 }

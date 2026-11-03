@@ -115,3 +115,17 @@ El repositorio conserva `scripts/preview-fixture.mjs`, una API local de prueba a
 - `../servidor/docs/mobile-billing-deployment.md`: documentación del backend y despliegue financiero, disponible en el proyecto hermano.
 
 El seguimiento GPS, las aprobaciones institucionales reales y la persistencia de datos de la demo quedan fuera del alcance de esta presentación.
+
+## Modo integrado local
+
+La configuración `.env.local` de este workspace apunta al Supabase compartido con clave pública y activa `EXPO_PUBLIC_DEMO=false`. Para volver a la presentación visual, establecer `EXPO_PUBLIC_DEMO=true` y reiniciar Expo; la configuración anterior se conservó en `.env.demo-preintegracion.local`. Consultar `CIERRE_TP_MOVIL_EDUCAR.md` para pruebas reales, límites y preparación EAS.
+
+## Referencia visual
+
+Los cambios de interfaz deben seguir [el Design System móvil](docs/EDUCAR_MOBILE_DESIGN_SYSTEM.md), para los modos integrado y DEMO.
+
+## Recuperar Metro en Windows y OneDrive
+
+Si Metro informa `EINVAL: invalid argument, readlink` o un error de caché, cerrá las instancias de Expo de este proyecto antes de reinstalar. No mantengas varios servidores leyendo la misma instalación durante `npm ci`. Ejecutá `npm ci` y luego `npm run export:web` para reconstruir la caché y verificar las 18 rutas. Para iniciar la presentación con caché limpia, usá `npm run web:limpio -- --port 8081`, o `npx expo start --go --lan --port 8081 --clear` con Expo Go compatible.
+
+Los accesos rápidos de las cuentas de prueba están disponibles en desarrollo mediante `EXPO_PUBLIC_QA_FAMILY_EMAIL`, `EXPO_PUBLIC_QA_FAMILY_PASSWORD`, `EXPO_PUBLIC_QA_STUDENT_EMAIL` y `EXPO_PUBLIC_QA_STUDENT_PASSWORD`, configurados únicamente en `.env.local` ignorado por Git. Estas variables son visibles para el cliente: utilizá exclusivamente cuentas DEMO y no distribuyas una compilación con esas contraseñas configuradas. El modo integrado requiere `EXPO_PUBLIC_DEMO=false`.

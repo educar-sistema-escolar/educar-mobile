@@ -13,10 +13,10 @@ function LegacyTabLayout() {
     if (!session)
         return <Redirect href="/login"/>;
     return (<Tabs screenOptions={{
-            tabBarActiveTintColor: palette.ink,
+            tabBarActiveTintColor: palette.primary,
             tabBarInactiveTintColor: palette.muted,
-            tabBarStyle: { backgroundColor: palette.paper, borderTopColor: palette.line, height: 62, paddingTop: 5 },
-            tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+            tabBarStyle: { backgroundColor: palette.paper, borderTopColor: palette.line, height: 72, paddingTop: 8, paddingBottom: 10 },
+            tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
             headerShown: false,
         }}>
       <Tabs.Screen name="children" options={{ href: null }}/><Tabs.Screen name="transport" options={{ href: null }}/><Tabs.Screen name="index" options={{
@@ -24,6 +24,7 @@ function LegacyTabLayout() {
             tabBarIcon: ({ color }) => <IconSymbol size={22} name="house.fill" color={color}/>,
         }}/>
       <Tabs.Screen name="payments" options={{
+            href: session.role === 'student' ? null : undefined,
             title: 'Cuotas',
             tabBarIcon: ({ color }) => <IconSymbol size={22} name="creditcard.fill" color={color}/>,
         }}/>
