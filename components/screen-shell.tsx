@@ -22,6 +22,6 @@ export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.soft },
-  content: { width: '100%', maxWidth: 600, alignSelf: 'center', paddingHorizontal: 20, paddingTop: 18, paddingBottom: 32, gap: 20 },
+  content: { width: '100%', maxWidth: 600, alignSelf: 'center', paddingHorizontal: 20, paddingTop: 24, paddingBottom: 36, gap: 24 },
   card: { borderWidth: 1, borderColor: palette.line, borderRadius: 20, padding: 18, backgroundColor: palette.paper, gap: 8 },
 });

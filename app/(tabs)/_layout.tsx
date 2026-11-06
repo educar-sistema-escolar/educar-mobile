@@ -16,7 +16,7 @@ function LegacyTabLayout() {
             tabBarActiveTintColor: palette.primary,
             tabBarInactiveTintColor: palette.muted,
             tabBarStyle: { backgroundColor: palette.paper, borderTopColor: palette.line, height: 72, paddingTop: 8, paddingBottom: 10 },
-            tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+            tabBarActiveBackgroundColor: '#EDF5FF', tabBarItemStyle: { borderRadius:16, marginHorizontal:4 }, tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
             headerShown: false,
         }}>
       <Tabs.Screen name="children" options={{ href: null }}/><Tabs.Screen name="transport" options={{ href: null }}/><Tabs.Screen name="index" options={{

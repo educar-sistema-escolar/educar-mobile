@@ -175,3 +175,7 @@ Identidad y rol claros; configuración/contraseña y cierre de sesión visibles.
 - [ ] Las pruebas de navegador, lint, TypeScript y Expo Doctor están documentadas, incluyendo límites.
 
 **Principio rector:** diseño institucional consistente, claridad por encima de decoración y ninguna pérdida de funcionalidad.
+
+## Extensión visual: comunidad escolar (05/11/2026)
+
+La portada integrada utiliza una tarjeta de cuenta con marco azul, interior blanco y cifra tabular. Los perfiles presentan iniciales, nombre y apellido sin truncado; cuando el ancho es insuficiente se apilan. La tipografía de portada puede alcanzar 34/39 dp y el título de acceso 42/46 dp, conservando escalado y contenedor fluido. Se usan nombres directos para navegación y acciones; la personalidad reside en la composición. La respuesta al toque usa cambios discretos de opacidad y escala sin movimiento automático. Mantener este criterio en futuras extensiones.
