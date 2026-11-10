@@ -97,6 +97,12 @@ Esta entrega se comprobó en navegador; no incluye un APK ni pruebas en disposit
 
 ## Integración existente con Supabase
 
+### Envío de estado de cuenta de prueba
+
+En el modo integrado, la cuenta familiar dispone de **Mi cuenta → Enviar estado de cuenta**. El botón solicita por correo un PDF informativo con hasta 12 facturas del alumno seleccionado. El PDF no es una factura fiscal. El envío está limitado a la cuenta y dirección de prueba configuradas en el servidor y no procesa la cola de recordatorios automáticos.
+
+El código del botón y de la función `family-statement-test` está integrado en los repositorios; para utilizarlo se debe desplegar la función y configurar `BILLING_TEST_EMAIL`, `BILLING_FROM_EMAIL` y `RESEND_API_KEY` como secretos del servidor. Hasta verificar ese despliegue y la recepción, el envío real permanece pendiente. Las claves de servidor no se deben incluir en `EXPO_PUBLIC_*`.
+
 Para ejecutar el modo integrado:
 
 1. Configurá `EXPO_PUBLIC_DEMO=false` en `.env.local`.

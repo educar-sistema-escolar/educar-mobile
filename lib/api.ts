@@ -37,7 +37,7 @@ async function rawRequest<T>(path: string, options: RequestInit = {}): Promise<T
         let data;
         try { data = body ? JSON.parse(body) : null; } catch { if (!response.ok) throw new Error(body.slice(0, 200) || 'Request failed. Please try again.'); throw new Error('The server returned an invalid response.'); }
         if (!response.ok)
-            throw new Error(data?.msg ?? data?.message ?? 'Request failed. Please try again.');
+            throw new Error(data?.msg ?? data?.message ?? data?.error ?? 'Request failed. Please try again.');
         return data as T;
     }
     finally {
@@ -118,6 +118,7 @@ export async function logout() {
 }
 export const resetPassword = (email: string) => request(`/auth/v1/recover?redirect_to=${encodeURIComponent(process.env.EXPO_PUBLIC_PASSWORD_RESET_URL || 'educar://recovery')}`, { method: 'POST', body: JSON.stringify({ email: email.trim().toLowerCase() }) });
 export const changePassword = (password: string) => request('/auth/v1/user', { method: 'PUT', body: JSON.stringify({ password }) });
+export const sendTestStatement = (childId: string) => request<{ sent: boolean }>('/functions/v1/family-statement-test', { method: 'POST', body: JSON.stringify({ childId }) });
 export async function uploadReceipt(path: string, blob: Blob, type: string) {
     if (session && session.expires_at < Date.now() + 60000)
         await refreshSession();
