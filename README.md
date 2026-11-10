@@ -101,7 +101,7 @@ Esta entrega se comprobó en navegador; no incluye un APK ni pruebas en disposit
 
 En el modo integrado, la cuenta familiar dispone de **Mi cuenta → Enviar estado de cuenta**. El botón solicita por correo un PDF informativo con hasta 12 facturas del alumno seleccionado. El PDF no es una factura fiscal. El envío está limitado a la cuenta y dirección de prueba configuradas en el servidor y no procesa la cola de recordatorios automáticos.
 
-El código del botón y de la función `family-statement-test` está integrado en los repositorios; para utilizarlo se debe desplegar la función y configurar `BILLING_TEST_EMAIL`, `BILLING_FROM_EMAIL` y `RESEND_API_KEY` como secretos del servidor. Hasta verificar ese despliegue y la recepción, el envío real permanece pendiente. Las claves de servidor no se deben incluir en `EXPO_PUBLIC_*`.
+El código del botón y de la función `family-statement-test` está integrado en los repositorios; para utilizarlo se debe desplegar la función y configurar `BILLING_DEMO_RECIPIENT`, `BILLING_FROM_EMAIL` y `RESEND_API_KEY` como secretos del servidor. La función se desplegó el 10/11/2026: una solicitud autenticada de la familia de prueba devolvió HTTP 200 y `sent: true`. Resend aceptó el envío; la recepción en la bandeja debe confirmarse. Las claves de servidor no se deben incluir en `EXPO_PUBLIC_*`.
 
 Para ejecutar el modo integrado:
 
@@ -135,3 +135,5 @@ Los cambios de interfaz deben seguir [el Design System móvil](docs/EDUCAR_MOBIL
 Si Metro informa `EINVAL: invalid argument, readlink` o un error de caché, cerrá las instancias de Expo de este proyecto antes de reinstalar. No mantengas varios servidores leyendo la misma instalación durante `npm ci`. Ejecutá `npm ci` y luego `npm run export:web` para reconstruir la caché y verificar las 18 rutas. Para iniciar la presentación con caché limpia, usá `npm run web:limpio -- --port 8081`, o `npx expo start --go --lan --port 8081 --clear` con Expo Go compatible.
 
 Los accesos rápidos de las cuentas de prueba están disponibles en desarrollo mediante `EXPO_PUBLIC_QA_FAMILY_EMAIL`, `EXPO_PUBLIC_QA_FAMILY_PASSWORD`, `EXPO_PUBLIC_QA_STUDENT_EMAIL` y `EXPO_PUBLIC_QA_STUDENT_PASSWORD`. Las cuentas DEMO públicas figuran en `.env.example`; copiá sus valores a `.env.local` para usarlas. Estas variables son visibles para el cliente: utilizá exclusivamente cuentas ficticias. El modo integrado requiere `EXPO_PUBLIC_DEMO=false`.
+
+La cuenta autorizada se fija con `BILLING_TEST_ACCOUNT_EMAIL` (por defecto la cuenta familiar DEMO del proyecto). El envío requiere `BILLING_DELIVERY_MODE=demo` y `BILLING_SEND_ENABLED=true`.
